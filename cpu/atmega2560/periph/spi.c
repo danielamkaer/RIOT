@@ -233,4 +233,3 @@ void spi_poweroff(spi_t dev) {
     }
 }
 #endif
-
