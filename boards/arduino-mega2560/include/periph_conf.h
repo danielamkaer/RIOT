@@ -254,12 +254,11 @@ extern "C" {
 #define SPI_0_EN            1
 #define SPI_1_EN            0
 
-// SPI 0 Registers
+/* SPI 0 Registers */
 #define SPI_0_CR 			SPCR
 #define SPI_0_DR 			SPDR
 #define SPI_0_SR 			SPSR
 #define SPI_0_DDR 			DDRB
-#define SPI_0_PORT 			PORTB
 #define SPI_0_MOSI 			PB2
 #define SPI_0_MISO 			PB3
 #define SPI_0_SCK 			PB1
