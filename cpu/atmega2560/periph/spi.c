@@ -53,9 +53,7 @@ int spi_init_master(spi_t dev, spi_conf_t conf, spi_speed_t speed)
 {
     uint8_t _spcr = (1<<SPI_0_MSTR)|(1<<SPI_0_SPE);
 
-    /* Assume F_CPU = 16.000.000 Hz
-     * Default rate is 4 MHz (SPR0, SPR1, SPI2X = 0)
-     */
+    /* Assume F_CPU = 16.000.000 Hz */
     switch (speed) {
         case SPI_SPEED_100KHZ:
             /* Actual rate = 125.000 Hz */
@@ -72,6 +70,9 @@ int spi_init_master(spi_t dev, spi_conf_t conf, spi_speed_t speed)
         case SPI_SPEED_10MHZ:
             /* Actual rate = 8.000.000 Hz */
             _spcr |= (1<<SPI_0_SPI2X);
+            break;
+        default:
+            /* Default rate is 4 MHz (SPR0, SPR1, SPI2X = 0) */
             break;
     }
 
@@ -139,9 +140,6 @@ int spi_init_slave(spi_t dev, spi_conf_t conf, char (*cb)(char data)) {
 
 int spi_conf_pins(spi_t dev) {
     /* Done by init functions */
-    return 0;
-}
-
     return 0;
 }
 
