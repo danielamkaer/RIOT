@@ -98,7 +98,17 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 		return status;
 	}
 	
-	status = nrf905_set_tx_power(dev, NRF905_PWR_10DBM);
+	status = nrf905_set_tx_power(dev, NRF905_PWR_N10DBM);
+	if (status < 0) {
+		return status;
+	}
+
+	status = nrf905_set_crc_en(dev, true);
+	if (status < 0) {
+		return status;
+	}
+
+	status = nrf905_set_crc_len(dev, NRF905_CRC_2BYTE);
 	if (status < 0) {
 		return status;
 	}
@@ -107,14 +117,24 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 
 }
 
-int nrf905_on_transmit(nrf905_t *dev) {
+int nrf905_transmit(nrf905_t *dev) {
 	gpio_set(dev->txen);
-	gpio_set(dev->pwr);
+	gpio_set(dev->ce);
 	return 0;
 }
 
-int nrf905_on_receive(nrf905_t *dev) {
+int nrf905_receive(nrf905_t *dev) {
 	gpio_clear(dev->txen);
+	gpio_set(dev->ce);
+	return 0;
+}
+
+int nrf905_stop(nrf905_t *dev) {
+	gpio_clear(dev->ce);
+	return 0;
+}
+
+int nrf905_on(nrf905_t *dev) {
 	gpio_set(dev->pwr);
 	return 0;
 }
@@ -130,7 +150,7 @@ int nrf905_read_reg(nrf905_t *dev, char reg, char *answer) {
 	spi_acquire(dev->spi);
 	gpio_clear(dev->csn);
 	xtimer_spin(2);
-	status = spi_transfer_reg(dev->spi, (CMD_R_REGISTER |(REGISTER_MASK & reg)), 0, answer);
+	status = spi_transfer_reg(dev->spi, (CMD_R_REGISTER | (REGISTER_MASK & reg)), 0, answer);
 	xtimer_spin(2);
 	gpio_set(dev->csn);
 	spi_release(dev->spi);
@@ -146,7 +166,7 @@ int nrf905_write_reg(nrf905_t *dev, char reg, char write) {
 	spi_acquire(dev->spi);
 	gpio_clear(dev->csn);
 	xtimer_spin(2);
-	status = spi_transfer_reg(dev->spi, (CMD_W_REGISTER |(REGISTER_MASK & reg)), write, &reg_content);
+	status = spi_transfer_reg(dev->spi, (CMD_W_REGISTER | (REGISTER_MASK & reg)), write, &reg_content);
 	xtimer_spin(2);
 	gpio_set(dev->csn);
 	spi_release(dev->spi);
@@ -409,4 +429,78 @@ int nrf905_set_crc_len(nrf905_t *dev, nrf905_crc_t len) {
 	}
 
 	return 0;
+}
+
+bool nrf905_data_ready(nrf905_t *dev) {
+	return (gpio_read(dev->dr) > 0);
+}
+
+bool nrf905_carrier_detect(nrf905_t *dev) {
+	return (gpio_read(dev->cd) > 0);
+}
+
+bool nrf905_address_match(nrf905_t *dev) {
+	return (gpio_read(dev->am) > 0);
+}
+
+int nrf905_write_payload(nrf905_t *dev, char *payload, int len) {
+	int status;
+
+	spi_acquire(dev->spi);
+	gpio_clear(dev->csn);
+	xtimer_spin(2);
+	status = spi_transfer_regs(dev->spi, CMD_W_TX_PAYLOAD, payload, NULL, len);
+	xtimer_spin(2);
+	gpio_set(dev->csn);
+	spi_release(dev->spi);
+
+	return status;
+
+}
+
+int nrf905_read_payload(nrf905_t *dev, char *answer, int len) {
+	int status;
+
+	spi_acquire(dev->spi);
+	gpio_clear(dev->csn);
+	xtimer_spin(2);
+	status = spi_transfer_regs(dev->spi, CMD_R_RX_PAYLOAD, NULL, answer, len);
+	xtimer_spin(2);
+	gpio_set(dev->csn);
+	spi_release(dev->spi);
+
+	return status;
+
+}
+
+int nrf905_set_rx_address(nrf905_t *dev, char *address, int len) {
+
+	int status;
+
+	spi_acquire(dev->spi);
+	gpio_clear(dev->csn);
+	xtimer_spin(2);
+	status = spi_transfer_regs(dev->spi, (CMD_W_REGISTER | (REG_RX_ADDRESS)), address, NULL, len);
+	xtimer_spin(2);
+	gpio_set(dev->csn);
+	spi_release(dev->spi);
+
+	return status;
+
+}
+
+int nrf905_set_tx_address(nrf905_t *dev, char *address, int len) {
+
+	int status;
+
+	spi_acquire(dev->spi);
+	gpio_clear(dev->csn);
+	xtimer_spin(2);
+	status = spi_transfer_regs(dev->spi, CMD_W_TX_ADDRESS, address, NULL, len);
+	xtimer_spin(2);
+	gpio_set(dev->csn);
+	spi_release(dev->spi);
+
+	return status;
+
 }

@@ -25,10 +25,11 @@
 extern "C" {
 #endif
 
-#define CMD_R_REGISTER          0x00
-#define CMD_W_REGISTER          0x10
-#define CMD_R_RX_PAYLOAD        0x28
+#define CMD_R_REGISTER          0x10
+#define CMD_W_REGISTER          0x00
+#define CMD_R_RX_PAYLOAD        0x24
 #define CMD_W_TX_PAYLOAD        0x20
+#define CMD_W_TX_ADDRESS        0x22
 #define CMD_NOP                 0x00
 
 #define REGISTER_MASK           0x0F

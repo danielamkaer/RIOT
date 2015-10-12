@@ -105,6 +105,7 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 * @return           -1 on error.
 */
 int nrf905_off(nrf905_t *dev);
+int nrf905_on(nrf905_t *dev);
 
 /**
 * @brief Power on the nrf905 transceiver in transmit mode.
@@ -114,7 +115,7 @@ int nrf905_off(nrf905_t *dev);
 * @return           0 on success.
 * @return           -1 on error.
 */
-int nrf905_on_receive(nrf905_t *dev);
+int nrf905_receive(nrf905_t *dev);
 
 /**
 * @brief Power on the nrf905 transceiver in transmit mode.
@@ -124,7 +125,8 @@ int nrf905_on_receive(nrf905_t *dev);
 * @return           0 on success.
 * @return           -1 on error.
 */
-int nrf905_on_transmit(nrf905_t *dev);
+int nrf905_transmit(nrf905_t *dev);
+int nrf905_stop(nrf905_t *dev);
 
 /**
 * @brief Read one register of the nrf905 transceiver.
@@ -161,6 +163,13 @@ int nrf905_set_tx_payload_width(nrf905_t *dev, uint8_t width);
 int nrf905_set_rx_payload_width(nrf905_t *dev, uint8_t width);
 int nrf905_set_crc_en(nrf905_t *dev, bool enabled);
 int nrf905_set_crc_len(nrf905_t *dev, nrf905_crc_t len);
+bool nrf905_address_match(nrf905_t *dev);
+bool nrf905_carrier_detect(nrf905_t *dev);
+bool nrf905_data_ready(nrf905_t *dev);
+int nrf905_write_payload(nrf905_t *dev, char *payload, int len);
+int nrf905_read_payload(nrf905_t *dev, char *answer, int len);
+int nrf905_set_rx_address(nrf905_t *dev, char *address, int len);
+int nrf905_set_tx_address(nrf905_t *dev, char *address, int len);
 
 #endif /* NRF905_H */
 /** @} */
