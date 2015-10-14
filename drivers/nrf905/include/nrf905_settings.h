@@ -55,6 +55,7 @@ extern "C" {
 #define UP_CLK_FREQ 			0x00
 #define UP_CLK_EN 				0x02
 #define XOF 					0x03
+#define XOF_MASK				0x38
 #define CRC_EN 					0x06
 #define CRC_MODE 				0x07
 

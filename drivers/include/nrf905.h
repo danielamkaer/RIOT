@@ -75,6 +75,14 @@ typedef enum {
     NRF905_CRC_2BYTE,        /**< encoding scheme generates 2 Bytes redundancy */
 } nrf905_crc_t;
 
+typedef enum {
+	NRF905_XOF_4MHZ = 0,
+	NRF905_XOF_8MHZ,
+	NRF905_XOF_12MHZ,
+	NRF905_XOF_16MHZ,
+	NRF905_XOF_20MHZ
+} nrf905_xof_t;
+
 /**
 * @brief Initialize the nrf905 transceiver.
 *
@@ -157,6 +165,7 @@ int nrf905_set_auto_retran(nrf905_t *dev, bool enabled);
 int nrf905_set_rx_reduced_power(nrf905_t *dev, bool enabled);
 int nrf905_set_tx_power(nrf905_t *dev, nrf905_pwr_t power);
 int nrf905_set_hfreq(nrf905_t *dev, bool enabled);
+int nrf905_set_xof(nrf905_t *dev, nrf905_xof_t freq);
 int nrf905_set_tx_address_width(nrf905_t *dev, nrf905_aw_t width);
 int nrf905_set_rx_address_width(nrf905_t *dev, nrf905_aw_t width);
 int nrf905_set_tx_payload_width(nrf905_t *dev, uint8_t width);

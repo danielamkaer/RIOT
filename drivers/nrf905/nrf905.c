@@ -48,6 +48,9 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 	gpio_init(dev->cd, GPIO_DIR_IN, GPIO_NOPULL);
 
 	gpio_set(dev->csn);
+	gpio_clear(dev->ce);
+	gpio_clear(dev->pwr);
+	gpio_clear(dev->txen);
 
 	spi_poweron(dev->spi);
 	spi_acquire(dev->spi);
@@ -74,6 +77,11 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 	}
 
 	status = nrf905_set_hfreq(dev, false);
+	if (status < 0) {
+		return status;
+	}
+
+	status = nrf905_set_xof(dev, NRF905_XOF_16MHZ);
 	if (status < 0) {
 		return status;
 	}
@@ -119,12 +127,14 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 
 int nrf905_transmit(nrf905_t *dev) {
 	gpio_set(dev->txen);
+	xtimer_spin(2);
 	gpio_set(dev->ce);
 	return 0;
 }
 
 int nrf905_receive(nrf905_t *dev) {
 	gpio_clear(dev->txen);
+	xtimer_spin(2);
 	gpio_set(dev->ce);
 	return 0;
 }
@@ -274,6 +284,41 @@ int nrf905_set_tx_power(nrf905_t *dev, nrf905_pwr_t power) {
 	}
 
 	return 0;
+}
+
+int nrf905_set_xof(nrf905_t *dev, nrf905_xof_t freq) {
+	int status;
+	char config1;
+
+	status = nrf905_read_reg(dev, REG_CONFIG1, &config1);
+	if (status < 0) {
+		return status;
+	}
+
+	config1 &= ~(XOF_MASK << XOF);
+	switch (freq) {
+		case NRF905_XOF_8MHZ:
+			config1 |= (1<<XOF);
+			break;
+		case NRF905_XOF_12MHZ:
+			config1 |= (0b10<<XOF);
+			break;
+		case NRF905_XOF_16MHZ:
+			config1 |= (0b11<<XOF);
+			break;
+		case NRF905_XOF_20MHZ:
+			config1 |= (0b100<<XOF);
+			break;
+		default:
+			// 4 Mhz
+			break;
+	}
+	status = nrf905_write_reg(dev, REG_CONFIG1, config1);
+	if (status < 0) {
+		return status;
+	}
+	return 0;
+
 }
 
 int nrf905_set_hfreq(nrf905_t *dev, bool enabled) {
