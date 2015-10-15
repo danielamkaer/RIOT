@@ -103,7 +103,7 @@ int gpio_init(gpio_t pin, gpio_dir_t dir, gpio_pp_t pullup)
         _SFR_MEM8(_ddr_addr(pin)) &= ~(1 << _pin_num(pin));
         res = bit_is_clear(_SFR_MEM8(_ddr_addr(pin)), _pin_num(pin));
 
-		if (res != 0) {
+		if (res == 0) {
 			return -1;
 		}
 
