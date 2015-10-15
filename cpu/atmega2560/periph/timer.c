@@ -381,7 +381,7 @@ void timer_start(tim_t dev)
 void timer_irq_enable(tim_t dev)
 {
 #ifdef DEVELHELP
-    printf("timer_irq_enable not implemented\n");
+//    printf("timer_irq_enable not implemented\n");
 #endif
 }
 
