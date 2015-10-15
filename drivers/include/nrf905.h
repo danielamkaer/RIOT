@@ -44,6 +44,7 @@ typedef struct {
     gpio_t am;      /**< GPIO pin to initialize as address match */
     gpio_t dr;      /**< GPIO pin to initialize as data ready */
     gpio_t cd;      /**< GPIO pin to initialize as carrier detect */
+	void *cb;
     int listener;   /**< Place to store an ID in */
 } nrf905_t;
 
@@ -83,6 +84,13 @@ typedef enum {
 	NRF905_XOF_20MHZ
 } nrf905_xof_t;
 
+typedef enum {
+	NRF905_INT_CD,
+	NRF905_INT_DR
+} nrf905_int_t;
+
+typedef void (*nrf905_cb_t)(nrf905_t *dev, nrf905_int_t what);
+
 /**
 * @brief Initialize the nrf905 transceiver.
 *
@@ -102,7 +110,7 @@ typedef enum {
 * @return           1 on success.
 * @return           -1 on error.
 */
-int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gpio_t pwr, gpio_t am, gpio_t dr, gpio_t cd);
+int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gpio_t pwr, gpio_t am, gpio_t dr, gpio_t cd, nrf905_cb_t cb);
 
 /**
 * @brief Power off the nrf905 transceiver.

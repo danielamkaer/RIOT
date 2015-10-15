@@ -25,7 +25,23 @@
 #define ENABLE_DEBUG (0)
 #include "debug.h"
 
-int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gpio_t pwr, gpio_t am, gpio_t dr, gpio_t cd) {
+static void nrf905_irq_handler_dr(void *arg) {
+	nrf905_t *dev = (nrf905_t*)arg;
+	if (dev->cb != NULL) {
+		nrf905_cb_t cb = (nrf905_cb_t)dev->cb;
+		cb(dev, NRF905_INT_DR);
+	}
+}
+
+static void nrf905_irq_handler_cd(void *arg) {
+	nrf905_t *dev = (nrf905_t*)arg;
+	if (dev->cb != NULL) {
+		nrf905_cb_t cb = (nrf905_cb_t)dev->cb;
+		cb(dev, NRF905_INT_CD);
+	}
+}
+
+int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gpio_t pwr, gpio_t am, gpio_t dr, gpio_t cd, nrf905_cb_t cb) {
 
 	int status;
 
@@ -37,6 +53,7 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 	dev->am = am;
 	dev->dr = dr;
 	dev->cd = cd;
+	dev->cb = (void*)cb;
 	dev->listener = KERNEL_PID_UNDEF;
 
 	gpio_init(dev->ce, GPIO_DIR_OUT, GPIO_NOPULL);
@@ -44,8 +61,13 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 	gpio_init(dev->txen, GPIO_DIR_OUT, GPIO_NOPULL);
 	gpio_init(dev->pwr, GPIO_DIR_OUT, GPIO_NOPULL);
 	gpio_init(dev->am, GPIO_DIR_IN, GPIO_NOPULL);
-	gpio_init(dev->dr, GPIO_DIR_IN, GPIO_NOPULL);
-	gpio_init(dev->cd, GPIO_DIR_IN, GPIO_NOPULL);
+	if (cb != NULL) {
+		gpio_init_int(dev->dr, GPIO_NOPULL, GPIO_BOTH, nrf905_irq_handler_dr, (void*)dev);
+		gpio_init_int(dev->cd, GPIO_NOPULL, GPIO_BOTH, nrf905_irq_handler_cd, (void*)dev);
+	} else {
+		gpio_init(dev->dr, GPIO_DIR_IN, GPIO_NOPULL);
+		gpio_init(dev->cd, GPIO_DIR_IN, GPIO_NOPULL);
+	}
 
 	gpio_set(dev->csn);
 	gpio_clear(dev->ce);
