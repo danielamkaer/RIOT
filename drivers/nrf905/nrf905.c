@@ -82,6 +82,11 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 	if (status < 0) {
 		return status;
 	}
+
+	status = nrf905_set_xof(dev, NRF905_XOF_16MHZ);
+	if (status < 0) {
+		return status;
+	}
 	
 	status = nrf905_set_channel(dev, 0b001101100);
 	if (status < 0) {
@@ -99,11 +104,6 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 	}
 
 	status = nrf905_set_hfreq(dev, false);
-	if (status < 0) {
-		return status;
-	}
-
-	status = nrf905_set_xof(dev, NRF905_XOF_16MHZ);
 	if (status < 0) {
 		return status;
 	}
@@ -142,6 +142,8 @@ int nrf905_init(nrf905_t *dev, spi_t spi, gpio_t ce, gpio_t csn, gpio_t txen, gp
 	if (status < 0) {
 		return status;
 	}
+
+	nrf905_write_reg(dev, REG_CONFIG1, 0xDF);
 
 	return 0;
 
