@@ -189,23 +189,23 @@ int spi_transfer_bytes(spi_t dev, char *out, char *in, unsigned int length) {
 }
 
 int spi_transfer_reg(spi_t dev, uint8_t reg, char out, char *in) {
-    int res = spi_transfer_byte(dev,reg,((in != NULL) ? in : NULL));
+    int res = spi_transfer_byte(dev,reg,NULL);
     if (res < 0) {
         return res;
     }
-    res = spi_transfer_byte(dev,out,((in != NULL) ? &(in[1]) : NULL));
+    res = spi_transfer_byte(dev,out,in);
     return res;
 }
 
 int spi_transfer_regs(spi_t dev, uint8_t reg, char *out, char *in,
         unsigned int length) {
 
-    int res = spi_transfer_byte(dev,reg,((in != NULL) ? in : NULL));
+    int res = spi_transfer_byte(dev,reg,NULL);
     if (res < 0) return res;
     unsigned int i;
     for (i = 0; i < length; i++) {
         res = spi_transfer_byte(dev,((out != NULL) ? out[i] : 0),
-                ((in != NULL) ? &(in[i+1]) : NULL)
+                ((in != NULL) ? &(in[i]) : NULL)
             );
         if (res < 0) {
             return res;
